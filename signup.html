@@ -4,7 +4,7 @@
         <title>Sign up </title>
     </head>
     <body>
-        <form action="" method="post">
+        <form action="/add_data" method="post">
             <lable >Name</lable>
             <input type="text" id="name" name="name" required>
             <lable>Email</lable>
@@ -12,6 +12,12 @@
             <label>Password</label>
             <input type="password" id="pwd" name="pwd" required>
             <input type="submit" value="Submit">
+        </form>
+        <br>
+        <br>
+        <form action="/redirect" method="get" >
+            <lable>For login,click on the LOGIN button</lable>
+            <button onclick="submit">Login</button>
         </form>
     </body>
 </html>

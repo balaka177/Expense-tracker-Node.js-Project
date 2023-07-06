@@ -4,6 +4,9 @@ const Product=require('./products');
 
 const {json}=require('body-parser');
 
+const db=require('../util/database');
+const { passError } = require('express-handlebars/lib/utils');
+
 exports.home=(req,res)=>{
     res.sendFile('/home/vijay/Videos/expense_tracker-node.js/signup.html');
 }
@@ -33,5 +36,31 @@ exports.add_data=(req,res)=>{
     .catch(err =>{
         console.log(err);
     })
+}
 
+exports.login=async(req,res)=>{
+     const a=await Product.findAll({where:{gmail:req.body.email} && {password:req.body.pwd}})
+   //  const b=await Product.findAll({where:{password:req.body.pwd}})
+    .then((resp)=>{
+       
+        if( resp.length>0){
+        res.json('User existed');
+
+    }   
+
+    Product.findAll({where:{gmail:req.body.email} })
+    .then((resp)=>{
+        if(resp.length>0){
+            res.json('user password wrong');
+        }
+        else{
+            res.json('User does not exitsted')
+        }
+    })
+        })
+}
+
+
+exports.redirect=(req,res)=>{
+    res.sendFile("/home/vijay/Videos/expense_tracker-node.js/login.html");
 }

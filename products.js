@@ -1,8 +1,8 @@
 const Sequelize=require('sequelize');
 
-const db=require('../util/database');
+const dbase=require('../util/database');
 
-const Product=db.define('New_users',{
+const Product=dbase.define('New_users',{
     name:{
         type:Sequelize.STRING,
         allowNull:false,
