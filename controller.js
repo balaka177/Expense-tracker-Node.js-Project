@@ -5,6 +5,9 @@ const Product=require('./products');
 const {json}=require('body-parser');
 
 const db=require('../util/database');
+
+const bcrypt=require('bcrypt');
+
 const { passError } = require('express-handlebars/lib/utils');
 
 exports.home=(req,res)=>{
@@ -16,18 +19,22 @@ exports.add_data=(req,res)=>{
     const gmail=req.body.gmail;
     const pwd=req.body.pwd;
 
-    Product.findAll({gamil:req.body.gamil})
+    Product.findAll({where:{gmail:gmail}})
     .then((resp) =>{
         if(resp.length!=0){
             res.json('User already exist')
         }
         else{
-            Product.create({
+            bcrypt.hash(pwd,10,async(err,hash)=>{
+                console.log(err);
+            
+            await Product.create({
                 name:name,
                 gmail:gmail,
-                password:pwd,
+                password:hash,
         
-
+            })
+            res.status(201).json({message:'Successfully created new User'})
         })
         }
 
@@ -39,26 +46,31 @@ exports.add_data=(req,res)=>{
 }
 
 exports.login=async(req,res)=>{
-     const a=await Product.findAll({where:{gmail:req.body.email} && {password:req.body.pwd}})
-   //  const b=await Product.findAll({where:{password:req.body.pwd}})
-    .then((resp)=>{
-       
-        if( resp.length>0){
-        return res.json('User login successful');
+    try{
+    const password=req.body.pwd;
+    const user=await Product.findAll({where:{gmail:req.body.email}})
+        console.log(user)
+        if( user.length>0){
+            bcrypt.compare(password,user[0].password,(err,result)=>{
+                if (err) throw err;
+                return res.json({success:true,message:'User login successful'});
 
-    }   
-
-    Product.findAll({where:{gmail:req.body.email} })
-    .then((resp)=>{
-        if(resp.length>0){
-            return res.status(401).json('User not Authorized');
+            })
         }
         else{
-            return res.status(404).json('User not found');
+            return res.status(401).json({success:false,message:'User not Authorized'});
         }
-    })
-        })
+        if(user.length<=0){
+            return res.status(404).json({success:false,message:'User does not exist'});
+        }
+       
+}catch(err){
+    console.log(err)
+} 
+
+
 }
+
 
 
 exports.redirect=(req,res)=>{
