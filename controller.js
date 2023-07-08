@@ -44,17 +44,17 @@ exports.login=async(req,res)=>{
     .then((resp)=>{
        
         if( resp.length>0){
-        res.json('User existed');
+        return res.json('User login successful');
 
     }   
 
     Product.findAll({where:{gmail:req.body.email} })
     .then((resp)=>{
         if(resp.length>0){
-            res.json('user password wrong');
+            return res.status(401).json('User not Authorized');
         }
         else{
-            res.json('User does not exitsted')
+            return res.status(404).json('User not found');
         }
     })
         })
