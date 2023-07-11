@@ -9,6 +9,7 @@ const routes=require('./routes');
 const db=require('../util/database');
 
 app.use(express.urlencoded({extended:false}));
+//app.use(bodyParser.json());
 
 app.use(routes);
 

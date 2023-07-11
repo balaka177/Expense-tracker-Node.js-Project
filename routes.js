@@ -13,4 +13,10 @@ route.post('/login',controller.login);
 
 route.get('/redirect',controller.redirect);
 
+route.post('/add_expense',controller.add_expense);
+
+route.get('/show_expenses',controller.show_expenses);
+
+route.delete('/delete/:id',controller.delete_user)
+
 module.exports=route;
