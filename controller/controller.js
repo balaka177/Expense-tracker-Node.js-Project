@@ -111,7 +111,8 @@ exports.addExpense=async(req,res)=>{
 exports.get_expenses=async(req,res,next)=>{
     try{
     const expense= await expense_table.findAll({where: {UserId:req.user.id}})
-    return res.json({exp:expense});
+    const prime=await users.findOne({where:{id:req.user.id}})
+    return res.json({exp:expense,prime:prime.isPrimeUser});
     }catch(err){
         console.log(err);
     }

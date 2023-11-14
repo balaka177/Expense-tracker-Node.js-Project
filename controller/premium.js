@@ -2,6 +2,11 @@ const Razorpay = require('razorpay');
 const orders=require('../model/order');
 const jwt=require('jsonwebtoken');
 const Order = require('../model/order');
+const users=require('../model/users')
+const expense_table=require('../model/expenses')
+const sequelize=require('../util/database');
+const { RESERVED } = require('mysql2/lib/constants/client');
+
 
 
 exports.purchage_premium=async (req,res,next)=>{
@@ -31,7 +36,7 @@ exports.update_purchase=async(req,res,next)=>{
     try{
         
         const {payment_id,order_id}=req.body;
-        console.log('payment id:',payment_id)
+        //console.log('payment id:',payment_id)
         if(payment_id===null){
             Order.findOne({where:{ orderid:order_id}}).then(order =>{
                 order.update({paymentid:payment_id,status:'FAILED'}).then(() =>{
@@ -52,7 +57,8 @@ exports.update_purchase=async(req,res,next)=>{
         Order.findOne({where:{orderid:order_id}}).then(order =>{
             order.update({paymentid:payment_id,status:'SUCCESSFUL'}).then(() =>{
                 req.user.update({isPrimeUser:true}).then(()=>{
-                    return res.status(202).json({success: true,message:'Transaction Successful'});
+                    return res.status(202).json({isPrimeUser:true,success: true,message:'Transaction Successful'});
+
                 }).catch((err)=>{
                     throw new Error(err)
                 })
@@ -68,4 +74,25 @@ exports.update_purchase=async(req,res,next)=>{
     }
 
 
+}
+
+exports.leader_board=async(req,res)=>{
+    try{
+    const leaderBoard=await users.findAll({
+        attributes:["id","name",[sequelize.fn("sum",sequelize.col('expenses.cost')),"total_amount"]],
+        include:[
+            {
+                model:expense_table,
+                attributes:[]
+            }
+        ],
+        group:['id'],
+        order:[['total_amount','DESC']]
+
+    })
+    //console.log(leaderBoard)
+    return res.json({user:leaderBoard})
+    }catch(err){
+        console.log(err)
+    }
 }

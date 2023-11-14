@@ -32,4 +32,8 @@ route.get('/purchase_premium',bodyParser.json(),userAuthentication.authenticate,
 
 route.post("/update_purchase",bodyParser.json(),userAuthentication.authenticate,premium.update_purchase);
 
+route.get('/leaderboard',bodyParser.json(),premium.leader_board);
+
+//route.post('/total_exp',bodyParser.json(),premium.total_exp);
+
 module.exports=route;
