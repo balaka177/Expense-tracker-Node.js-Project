@@ -2,16 +2,41 @@
 <html>
     <head>
         <title>Login</title>
+        <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>   
+        
     </head>
     <body>
-        <form method='post' action='/login'>
+        <form onsubmit="login_save(event)">
             <lable >Gmail</lable>
             <input type='gmail' name='gmail'></input>
             <lable>Password</lable>
             <input type="password" name="pwd"></input>
             <input type='submit' value='Submit'></input>
         </form>
-
+        <div>
+            <a href="./signup.html"><b>Signup for new users</b></a>
+        </div>
+        <script>
+            async function login_save(e){
+            try{
+            e.preventDefault();
+            const loginDetails={
+            gmail:e.target.gmail.value,
+            password:e.target.pwd.value,
+                }
+            const resp=await axios.post('http://localhost:8080/login',loginDetails);
             
+            //console.log(resp.data.token);
+            localStorage.setItem('token',resp.data.token);
+            window.location.href="./expenseTracker.html";
+
+            }catch(err){
+                console.log(err);
+            }
+            }
+        </script>
+
+
+       
     </body>
 </html>
