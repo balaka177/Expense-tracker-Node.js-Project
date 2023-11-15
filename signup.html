@@ -1,26 +1,59 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>Sign up </title>
-    </head>
-    <body>
-        <form action="/add_data" method="post">
-            <lable >Name</lable>
-            <input type="text" id="name" name="name" required>
-            <lable>Email</lable>
-            <input type="gmail" id="gmail" name="gmail" required>
-            <label>Password</label>
-            <input type="password" id="pwd" name="pwd" required>
-            <input type="submit" value="Submit">
-        </form>
-        <br>
-        <br>
-        <form action="/redirect" method="get" >
-            <lable>For login,click on the LOGIN button</lable>
-            <button onclick="submit">Login</button>
-        </form>
-        <ul id="ul">
+    <html>
+        <head>
+            <title>Signup</title>
+            <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+
+        </head>
+        <body>
+            <form onsubmit="signup_save(event)" >
+                <lable>Name</lable>
+                <input type="text" name="name">
+                <label>Gmail</label>
+                <input type="gmail" name="gmail">
+                <label>Password</label>
+                <input type="password" name="pwd">
+                <input type="submit" value="Signup">
+
+            </form>
+            <br>
+            <br>
+            <div>
+            <label>For Existed User</label>
+            <button onclick="login()">Login</button>
+            </div>
+            <script>
+                function login(){
+                    window.location.href='./login.html'
+                }
+                    async function signup_save(event){
+                    try{
+                        
+                        event.preventDefault();
+                        console.log('script')
+                        const signUpDetails={
+                            name:event.target.name.value,
+                            gmail:event.target.gmail.value,
+                            password:event.target.pwd.value
+                        }
+                        console.log('signup_details',signUpDetails)
+
+                        const res=await axios.post("http://localhost:8080/signup",signUpDetails);
+                        
+                        if(res.status==200){
+                            window.location.href="./login.html";
+                            console.log('res',res)
+                        }
+                        else{   
+                            throw new error ('Failed to login');
+                        }
+                    }catch(err){
+                            console.log(err)
+                        }
+
+                    
+                }   
+            </script>
             
-        </ul>
-    </body>
-</html>
+        </body>
+    </html>
