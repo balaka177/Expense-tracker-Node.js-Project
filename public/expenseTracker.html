@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+    <head> 
+        <title>Expenses</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+        <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    </head>
+    <body>  
+        <div>
+        <form class="container" onsubmit="expense_save(event)">
+            <label>Item cost</label>
+            <input type="number" name="cost" required>
+            <label>Item description</label>
+            <input type="text" name="desc" required>
+            <label>Choose category</label>
+            <select name="cate" required>n
+                <option value="Vegetables">Vegetables</option>
+                <option value="Fuel">Fuel</option>
+                <option value="Snacks">Snacks</option>
+                <option value="Bill">Bill</option>
+                <option value="Meat">Meat</option>
+            </select>
+            <input type="submit" value="Add Expense">
+        </form>
+        <div class="container" id="primium-button">
+            
+        </div>
+        <div class="container">
+            <p id="message"></p>
+        </div>
+
+        <form class="container">
+            <h5>Expenses:</h5>
+            <ul id="list">
+
+            </ul>
+        </form>
+    </div>
+        <div class="container">
+            <form >
+                <h4 id="h4"></h4>
+                <ul id="lead">
+
+                </ul>
+            </form>
+        </div>
+        <div class="container">
+            <p id="report-option"></p>
+        </div>
+    <script>
+    window.addEventListener('DOMContentLoaded',async()=>{
+    try{
+   
+    token=localStorage.getItem('token')
+    await axios.get('http://localhost:8080/get_expenses',{headers:{'Authorization':token}})
+    .then((res)=>{
+        
+        for(let i=0;i<res.data.exp.length;i++){
+            //console.log(res.data.exp[i])
+            showUserOnScreen(res.data.exp[i])
+        }
+        const primeUser=res.data.prime;
+        if(primeUser===true){
+                    upd_msg=document.getElementById('message')
+                    upd_msg.innerHTML=upd_msg.innerHTML+'You are a Prime user    ';
+
+                    const button=document.createElement('button');
+                    button.id='leaderboard';
+                    button.textContent='Show Leader board'
+                    upd_msg.appendChild(button);
+                    button.onclick=async()=>{
+                    try{
+                        
+                        const res=await axios.get('http://localhost:8080/leaderboard')
+                        const h4=document.getElementById('h4');
+                        h4.innerHTML='Leader board';
+                        for(let i=0;i<res.data.user.length;i++){
+                        
+                            showLeaderBoard(res.data.user[i])
+                        } 
+                    }catch(err){
+                        console.log(err)
+                    }
+                }
+                document.getElementById('report-option').innerHTML=`<p>Reports:</p>
+                            <select id='report_type'>
+                                <option>Select report type</option>
+                                <option value='Weekly'>Weekly report</option>
+                                <option value='Monthly'>Monthly report</option>
+                                <option value='Yearly'>Yearly report</option>
+                            </select>` 
+            
+        } else{
+            const pre=document.getElementById('primium-button')
+            const btn=document.createElement('button');
+            btn.textContent='Buy Premium';
+            btn.id='buy_premium';
+            pre.appendChild(btn);
+
+            btn.onclick=async() =>{
+            try{
+            const token=localStorage.getItem('token');
+            //console.log('purchase script',token)
+            const res=await axios.get('http://localhost:8080/purchase_premium',{headers: {'Authorization':token}})
+            var options={
+                "key":res.data.key_id,
+                "order_id":res.data.order.id,
+                "handler":async function(res){
+                const d1= await axios.post('http://localhost:8080/update_purchase',{
+                        order_id:options.order_id,
+                        payment_id:res.razorpay_payment_id,
+                    },{ headers:{"Authorization":token}})
+                    alert('You are a Premium User now');
+                    
+                    if(d1.data.isPrimeUser===true){
+                        upd_msg=document.getElementById('message')
+                        upd_msg.innerHTML='You are a Prime user'
+                    }
+                }
+            }
+            const rzp1=new Razorpay(options);
+            rzp1.open();
+            //e.preventDefault();
+
+            rzp1.on('payment.failed',async function(){
+                try{
+                    const key=res.data.order.id;
+                    const response=await axios.post('http://localhost:8080/update_purchase',{
+                        'order_id':key,
+                        'payment_id': null,
+                    },{ headers:{"Authorization":token}})
+                    alert('Payment failed')
+                    
+                }catch(err){
+                    console.log(err);
+                }
+            })
+                
+
+       
+
+}catch(err){
+    console.log(err)
+}
+
+}
+
+        }
+       
+    })
+}catch(err){
+    console.log(err)
+}
+})
+function showUserOnScreen(exp){
+    const parentEle=document.getElementById('list');
+    const chiledEle=document.createElement('li');
+    chiledEle.textContent=exp.cost +' -  '+ exp.description +' - '+ exp.category+'  ';
+    parentEle.appendChild(chiledEle);
+    const delButton=document.createElement('input');
+    delButton.type='button';
+    delButton.value='Delete';
+    chiledEle.appendChild(delButton);
+    delButton.onclick=async()=>{
+        try{               
+        const token=localStorage.getItem('token')
+        await axios.delete(`http://localhost:8080/delete_expense/${exp.id}`,{headers:{'Authorization':token}})
+         .then((resp)=>{
+            parentEle.removeChild(chiledEle);
+         }).catch(err =>{
+            console.log(err)
+         })
+        }catch(err){
+            console.log(err)
+        }
+
+    }
+}
+        
+        function showLeaderBoard(a){
+            const parentEle=document.getElementById('lead')
+            chiledEle=document.createElement('li');
+            if (a.total_amount===null){
+                a.total_amount=0
+            }
+            chiledEle.textContent=`Name: ${a.name},  Total expense:${a.total_expense}`
+            parentEle.appendChild(chiledEle) 
+        } 
+    
+    async function expense_save(e){
+    try{
+         
+        const expenseDetails={
+         cost:e.target.cost.value,
+         description:e.target.desc.value,
+         category:e.target.cate.value,
+            }
+        console.log(expenseDetails)
+        const token=localStorage.getItem('token');
+        const hi = await axios.post('http://localhost:8080/add_expense',expenseDetails,{headers: {'Authorization':token}})
+    
+
+        
+    }catch(err){
+        console.log(err);
+    }
+}
+
+
+
+
+    </script>
+    </body>
+</html>
