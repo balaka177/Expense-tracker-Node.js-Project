@@ -1,0 +1,30 @@
+
+<html>
+    <head>
+       
+        <title>Login</title>
+        <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script> 
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+
+    </head>
+    <body>
+        <form onsubmit="login_save(event)">
+            <lable >Gmail</lable>
+            <input type='gmail' name='gmail'></input>
+            <lable>Password</lable>
+            <input type="password" name="pwd"></input>
+            <input type='submit' value='Submit'></input>
+        </form>
+        <div>
+            <a href="./signup.html"><b>Signup for new users</b></a>
+        </div>
+        <div>
+            <b>Forget password </b><button id="forget_pwd">click here</button>
+        </div>
+        <script src="./login.js"></script>
+
+
+       
+    </body>
+</html>
